@@ -1,4 +1,4 @@
-# [NMRiH] Voice Commad Block
+# [NMRiH] Voice Command Block
 
 Blocks radial voice commands from people you've muted (Scoreboard -> Mute player)
 
