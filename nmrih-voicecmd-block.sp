@@ -8,18 +8,41 @@ public Plugin myinfo =
 	name        = "Voice Command Block",
 	author      = "Dysphie",
 	description = "Block voice commands from people you've muted",
-	version     = "0.1.0",
+	version     = "0.1.2",
 	url         = ""
 };
 
+ConVar cvEnable;
+ConVar cvIgnoreNade;
+
 public void OnPluginStart()
 {
+	cvIgnoreNade = CreateConVar("sm_voicecmd_block_ignore_nade_throws", "1", "Broadcast grenade throws regardless of block status");
+	cvEnable = CreateConVar("sm_voicecmd_block_enable", "1", "Enables or disables the plugin");
 	AddTempEntHook("TEVoiceCommand", OnVoiceCmd);
+
+	AutoExecConfig();
 }
 
 public Action OnVoiceCmd(const char[] te_name, const int[] targets, int numTargets, float delay)
 {
+	if (!cvEnable.BoolValue)
+		return Plugin_Continue;
+
 	int caller = TE_ReadNum("_playerIndex");
+
+	if (cvIgnoreNade.BoolValue)
+	{
+		// Broadcast grenade throws regardless of block status
+		// We check that the pin is pulled to account for fake vocalizers
+		int weapon = GetEntPropEnt(caller, Prop_Send, "m_hActiveWeapon");
+		if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_bPinPulled") 
+			&& GetEntProp(weapon, Prop_Send, "m_bPinPulled")) 
+		{
+			return Plugin_Continue;
+		}
+	}
+
 	int[] filtered = new int[numTargets];
 	int numFiltered;
 
